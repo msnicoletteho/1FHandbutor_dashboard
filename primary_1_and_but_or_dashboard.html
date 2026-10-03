@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Analytics Dashboard - P1 Grammar Quest</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'cursive', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-fredoka { font-family: 'Fredoka', cursive, sans-serif; }
+    </style>
+</head>
+<body class="h-full bg-slate-100 text-slate-800 flex flex-col overflow-x-hidden">
+
+    <script>
+        // INTERNAL CONFIGURATION VARIABLE FOR TEACHER BACKEND (GOOGLE APPS SCRIPT)
+        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxX4Rj5HPq-smeos-ce2tB65N5zEFWFB_5hYAV8v_KchD9sPFSs-4IUkc0hZowSwTvpaA/exec";
+    </script>
+
+    <header class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-40 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-2xl text-2xl shadow-sm">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+                <h1 class="font-fredoka text-xl font-bold text-slate-800">MOE P1 English Teacher Dashboard</h1>
+                <p class="text-xs text-slate-500 font-medium">Class Performance & Misconception Tracking (And, Or, But)</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="refreshDashboardData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-fredoka text-sm rounded-xl shadow-md transition-all flex items-center space-x-2">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Refresh Live Data</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6 overflow-y-auto">
+
+        <!-- Top Metrics Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="p-4 bg-emerald-100 text-emerald-600 rounded-2xl text-2xl">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-fredoka text-slate-400 uppercase tracking-wide">Active Students</span>
+                    <h3 class="font-fredoka text-2xl font-bold text-slate-700" id="metricTotalStudents">28</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="p-4 bg-amber-100 text-amber-600 rounded-2xl text-2xl">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-fredoka text-slate-400 uppercase tracking-wide">Class Average Score</span>
+                    <h3 class="font-fredoka text-2xl font-bold text-slate-700" id="metricAvgScore">92 pts</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="p-4 bg-rose-100 text-rose-600 rounded-2xl text-2xl">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-fredoka text-slate-400 uppercase tracking-wide">Mastery Rate</span>
+                    <h3 class="font-fredoka text-2xl font-bold text-slate-700" id="metricMasteryRate">88%</h3>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center space-x-4">
+                <div class="p-4 bg-purple-100 text-purple-600 rounded-2xl text-2xl">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-fredoka text-slate-400 uppercase tracking-wide">Most Played Level</span>
+                    <h3 class="font-fredoka text-2xl font-bold text-slate-700" id="metricTopLevel">Medium</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analytics & Student Records Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Student Submissions Table (2 cols) -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-fredoka text-lg font-bold text-slate-700">Student Mission Submissions</h3>
+                    <span class="text-xs font-medium text-slate-400">Live Sync Enabled</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-xs font-fredoka text-slate-400 uppercase">
+                                <th class="py-3 px-4">Student Name</th>
+                                <th class="py-3 px-4">Class</th>
+                                <th class="py-3 px-4">Level</th>
+                                <th class="py-3 px-4">Score</th>
+                                <th class="py-3 px-4">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentSubmissionsTableBody" class="text-sm font-medium text-slate-700">
+                            <tr class="border-b border-slate-50 hover:bg-slate-50">
+                                <td class="py-3 px-4 font-bold text-slate-800">Sarah Lim</td>
+                                <td class="py-3 px-4">P1-A</td>
+                                <td class="py-3 px-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-lg text-xs font-fredoka">Medium</span></td>
+                                <td class="py-3 px-4 font-bold text-rose-600">120 pts</td>
+                                <td class="py-3 px-4 text-xs text-slate-400">Today, 11:15 AM</td>
+                            </tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50">
+                                <td class="py-3 px-4 font-bold text-slate-800">Aiden Tan</td>
+                                <td class="py-3 px-4">P1-A</td>
+                                <td class="py-3 px-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-lg text-xs font-fredoka">Medium</span></td>
+                                <td class="py-3 px-4 font-bold text-rose-600">110 pts</td>
+                                <td class="py-3 px-4 text-xs text-slate-400">Today, 10:42 AM</td>
+                            </tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50">
+                                <td class="py-3 px-4 font-bold text-slate-800">Chloe Koh</td>
+                                <td class="py-3 px-4">P1-B</td>
+                                <td class="py-3 px-4"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg text-xs font-fredoka">Easy</span></td>
+                                <td class="py-3 px-4 font-bold text-rose-600">95 pts</td>
+                                <td class="py-3 px-4 text-xs text-slate-400">Yesterday, 4:20 PM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Misconception & Pedagogical Insights (1 col) -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="font-fredoka text-lg font-bold text-slate-700">Misconception Insights</h3>
+                    <p class="text-xs text-slate-400">AI analysis of frequent error patterns</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-fredoka text-xs font-bold text-rose-600 uppercase">Confusion: "And" vs "But"</span>
+                            <span class="text-xs bg-rose-200 text-rose-800 px-2 py-0.5 rounded-md font-bold">18% errors</span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Students occasionally confuse contrasting ideas with extra ideas when negative outcomes are involved.</p>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-fredoka text-xs font-bold text-amber-700 uppercase">Confusion: "Or" in statements</span>
+                            <span class="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-md font-bold">12% errors</span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">Some P1 learners use "and" instead of "or" when presented with mutually exclusive choices.</p>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-xs text-indigo-800 space-y-1">
+                        <span class="font-fredoka font-bold block"><i class="fa-solid fa-lightbulb mr-1"></i> Pedagogical Tip:</span>
+                        Use tactile flashcards highlighting contrasting connectors ("but" for surprise/opposition) before the next lesson.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        async function refreshDashboardData() {
+            if (GOOGLE_APPS_SCRIPT_URL.includes("PASTE_YOUR")) {
+                alert("Please update GOOGLE_APPS_SCRIPT_URL in the code to fetch live Google Sheets data.");
+                return;
+            }
+            try {
+                const res = await fetch(GOOGLE_APPS_SCRIPT_URL);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    // Populate dashboard dynamically
+                }
+            } catch (e) {
+                console.log("Error fetching teacher data:", e);
+            }
+        }
+    </script>
+
+</body>
+</html>
